@@ -1,5 +1,6 @@
 from .. import db
 from .base_model import BaseModel
+from sqlalchemy import ForeignKey
 
 
 class User(BaseModel):
@@ -16,3 +17,5 @@ class User(BaseModel):
         db.Text(),
         nullable=False
     )
+    bien_id = db.Column(db.Integer, ForeignKey("bienes.id"))
+    child = db.relationship("Bienes", back_populates="user")

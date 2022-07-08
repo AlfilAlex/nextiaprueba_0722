@@ -20,5 +20,6 @@ class Config:
     DB_HOST = getenv('DB_HOST')
     DB_PORT = getenv('DB_PORT')
     DB_DBNAME = getenv('DB_DBNAME')
+    PREFIX = getenv('PREFIX')
 
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DBNAME}'
