@@ -2,8 +2,8 @@ from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
-# from flask_migrate import Migrate
-# migrate = Migrate(compare_type=True)
+from flask_migrate import Migrate
+migrate = Migrate(compare_type=True)
 db = SQLAlchemy()
 
 
@@ -20,6 +20,6 @@ def create_app():
 
         app.register_blueprint(user_session)
         db.create_all()
-        # migrate.init_app(app, db)
+        migrate.init_app(app, db)
 
         return app
