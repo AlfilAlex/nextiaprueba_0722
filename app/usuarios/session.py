@@ -9,7 +9,7 @@ from ..models.user import User
 from .. import db
 
 api_prefix = app.config['PREFIX']
-user_session = Blueprint('event_profile', __name__, url_prefix=api_prefix)
+user_session = Blueprint('user_session', __name__, url_prefix=api_prefix)
 
 
 @user_session.route('/user-registration', methods=['POST'])

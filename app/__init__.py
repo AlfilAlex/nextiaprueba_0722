@@ -17,8 +17,10 @@ def create_app():
     with app.app_context():
 
         from .usuarios.session import user_session
+        from .bienes_managment.bienes_managment import bienes_managment
 
         app.register_blueprint(user_session)
+        app.register_blueprint(bienes_managment)
         db.create_all()
         migrate.init_app(app, db)
 

@@ -9,6 +9,7 @@ class Bienes(db.Model):
     id = db.Column(
         db.Integer,
         primary_key=True,
+        autoincrement=True
     )
     created_at = db.Column(
         db.DateTime,
