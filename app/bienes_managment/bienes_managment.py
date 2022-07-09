@@ -18,8 +18,8 @@ bienes_managment = Blueprint(
     'bienes_managment', __name__, url_prefix=api_prefix)
 
 
-@bienes_managment.route('/user-bienes-registration-csv', methods=['POST'])
-def registrate_user_bienes():
+@bienes_managment.route('/csv-bienes-registration', methods=['POST'])
+def user_csv_post_bienes():
     bienes_df = pd.read_csv(request.files['csv_file'])
     # Procesamiento de la información
     # ...
@@ -39,8 +39,8 @@ def registrate_user_bienes():
     return make_response({'no_bienes': len(bienes)})
 
 
-@bienes_managment.route('/user-bienes-registration', methods=['POST'])
-def registrate_bienes_registration():
+@bienes_managment.route('/bienes-managment', methods=['POST'])
+def bienes_registration():
     articulo = request.form.get('articulo')
     descripcion = request.form.get('descripcion')
 
@@ -60,22 +60,56 @@ def registrate_bienes_registration():
         print(e)
         return make_response({'succes': False, 'error': 'Un error interno ocurrió con las credenciales brindadas, revisar'}, 500)
 
-    return make_response({'succes': True, 'bien': {'articulo': articulo}, 'usser': usuario_id}, 200)
+    return make_response({'succes': True, 'bien': {'articulo': articulo, 'id': bien.id}, 'user': usuario_id}, 200)
 
 
-@bienes_managment.route('/user-bienes-read', methods=['POST'])
-def registrate_bienes_read():
-    pass
+@bienes_managment.route('/bienes-managment/buscar', methods=['GET'])
+def bienes_read():
+    #! CHECK USER ID FROM JWT
+    usuario_id = 1
+
+    bien_ids = request.args.get('bien_id')
+    bien_ids = bien_ids.split(',')
+
+    bienes = [Bienes.query.get(bien_id) for bien_id in bien_ids]
+    bienes_in_db = [bien_id for bien_id in bienes if bien_id is not None]
+    bienes_info = [_get_bien_info(bien) for bien in bienes_in_db]
+
+    # bien = Bienes.query.get(bien_id)
+    if not bienes_info:
+        succes = False
+        message = {'error': f'No existen bienes con id: {bien_ids}'}
+        status = 500
+    else:
+        succes = True
+        message = {'bienes': bienes_info}
+        status = 200
+
+    return make_response({'succes': succes, 'message': message, 'user_consultante_id': usuario_id}, status)
 
 
-@bienes_managment.route('/user-bienes-update', methods=['POST'])
-def registrate_bienes_update():
-    pass
+@bienes_managment.route('/bienes-managment/<bien_id>/cambiar', methods=['PUT'])
+def bienes_update(bien_id):
+    #! RECORDAR ACTUALIZAR LA PROPIEDAD UPDATE
+    bien = Bienes.query.get(bien_id)
 
 
-@bienes_managment.route('/user-bienes-delete', methods=['POST'])
-def registrate_bienes_delete():
-    pass
+@bienes_managment.route('/bienes-managment/<bien_id>', methods=['DELETE'])
+def bienes_delete(bien_id):
+    #! GET USER ID FROM JWT
+    usuario_id = 1
+
+    bien = Bienes.query.get(bien_id)
+    if not bien:
+        succes = False
+        status = 500
+    else:
+        db.session.delete(bien)
+        db.session.commit()
+        succes = True
+        status = 200
+
+    return make_response({'succes': succes, 'user_consultante_id': usuario_id}, status)
 
 # ! FALTA IMPLEMENTAR usuario_id
 # ! UN ERROR GRAVE CON EL MANY TO ONE EN usuario_id
@@ -88,3 +122,8 @@ def _get_bien_model(articulo, descripcion, usuario_id=1):
                   articulo=articulo,
                   descripcion=descripcion,
                   usuario_id=usuario_id)  # ! FALTA IMPLEMENTAR
+
+
+def _get_bien_info(bien):
+    return {'id': bien.id, 'article': bien.articulo,
+            'descripcion': bien.descripcion, 'user_author_id': bien.usuario_id}
