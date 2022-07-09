@@ -1,5 +1,5 @@
 from .. import db
-# from .base_model import BaseModel
+from .user import User
 
 
 # class Bienes(BaseModel, db.Model):
@@ -9,7 +9,7 @@ class Bienes(db.Model):
     id = db.Column(
         db.Integer,
         primary_key=True,
-        autoincrement=True
+        # autoincrement=True
     )
     created_at = db.Column(
         db.DateTime,
@@ -24,6 +24,6 @@ class Bienes(db.Model):
     )
     descripcion = db.Column(
         db.String(255),
-        primary_key=True,
     )
-    usuario_id = db.relationship("User", back_populates="bienes")
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # usuario_id = db.relationship("User", back_populates="bienes")

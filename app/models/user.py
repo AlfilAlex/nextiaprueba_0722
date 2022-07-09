@@ -1,6 +1,6 @@
 from .. import db
 # from .base_model import BaseModel
-from .bienes import Bienes
+# from .bienes import Bienes
 from sqlalchemy import ForeignKey
 
 
@@ -11,7 +11,7 @@ class User(db.Model):
     id = db.Column(
         db.Integer,
         primary_key=True,
-        autoincrement=True
+        # autoincrement=True
     )
     created_at = db.Column(
         db.DateTime,
@@ -26,12 +26,11 @@ class User(db.Model):
     )
     usuario = db.Column(
         db.String(30),
-        primary_key=True,
         unique=True
     )
     contrasenia = db.Column(
         db.Text(),
         nullable=False
     )
-    bien_id = db.Column(db.Integer, ForeignKey(Bienes.id), nullable=True)
-    bienes = db.relationship("Bienes", back_populates="usuario_id")
+    # bien_id = db.Column(db.Integer, ForeignKey(Bienes.id), nullable=True)
+    bienes = db.relationship("Bienes")

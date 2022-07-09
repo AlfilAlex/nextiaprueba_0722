@@ -11,6 +11,7 @@ from ..models.user import User
 from ..models.bienes import Bienes
 from .. import db
 import pandas as pd
+import numpy as np
 
 api_prefix = app.config['PREFIX']
 bienes_managment = Blueprint(
@@ -32,7 +33,7 @@ def registrate_user_bienes():
         db.session.commit()
     except Exception as e:
         print(e)
-        make_response(
+        return make_response(
             {'error': 'No fue posible agregar la información del csv en la base de datos'}, 500)
 
     return make_response({'no_bienes': len(bienes)})
@@ -40,9 +41,10 @@ def registrate_user_bienes():
 
 # ! FALTA IMPLEMENTAR usuario_id
 # ! UN ERROR GRAVE CON EL MANY TO ONE EN usuario_id
-def _get_bien_model(articulo, descripcion, usuario_id=[User.query.filter_by(id=1).first()]):
-    print(articulo, descripcion)
-    return Bienes(created_at=dt.utcnow(),
+def _get_bien_model(articulo, descripcion, usuario_id=1):
+    if not isinstance(descripcion, str) and np.isnan(descripcion):
+        descripcion = None
+    return Bienes(created_at=dt.utcnow().isoformat(),
                   articulo=articulo,
                   descripcion=descripcion,
                   usuario_id=usuario_id)  # ! FALTA IMPLEMENTAR
