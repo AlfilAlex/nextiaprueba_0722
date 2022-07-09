@@ -88,10 +88,20 @@ def bienes_read():
     return make_response({'succes': succes, 'message': message, 'user_consultante_id': usuario_id}, status)
 
 
-@bienes_managment.route('/bienes-managment/<bien_id>/cambiar', methods=['PUT'])
+@bienes_managment.route('/bienes-managment/<int:bien_id>/cambiar', methods=['PUT'])
 def bienes_update(bien_id):
     #! RECORDAR ACTUALIZAR LA PROPIEDAD UPDATE
-    bien = Bienes.query.get(bien_id)
+    bien = Bienes.query.filter_by(id=bien_id)
+
+    if bien:
+        cambios_por_columna = request.args.to_dict()
+        cambios_por_columna['updated_at'] = dt.utcnow().isoformat()
+
+        bien.update(cambios_por_columna)
+        db.session.commit()
+
+    # TODO Mandar info actualizada
+    return make_response({'bien': _get_bien_info(bien.first())}, 200)
 
 
 @bienes_managment.route('/bienes-managment/<bien_id>', methods=['DELETE'])
