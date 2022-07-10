@@ -32,6 +32,7 @@ de quien aplica a la vacante de desarrollador Backend.
 3. Generar un modelo para usuarios (que herede de BaseModel).
    Se implementó el modelo users en: app_prueba/app/models/user.py.
    Se heredó de ModeloBase las propiedad pertienentes.
+   Se generó una relación One To Many con la tabla de Bienes
 
 Se declaró como _unique_ la propiedad usuario.
 
