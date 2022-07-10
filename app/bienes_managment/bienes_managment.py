@@ -3,6 +3,7 @@ from pymysql.err import IntegrityError
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime as dt
 from flask import current_app as app
+from sqlalchemy import exc
 
 from ..models.bienes import Bienes
 from .. import db
@@ -21,19 +22,28 @@ bienes_managment = Blueprint(
 @token_required
 def user_csv_post_bienes(current_user):
     bienes_df = pd.read_csv(request.files['csv_file'])
-    # Procesamiento de la información
-    # ...
-    bienes_df = bienes_df[['id', 'articulo', 'descripcion']]
+    try:
+        bienes_df = bienes_df[['id', 'articulo', 'descripcion']]
+    except KeyError:
+        return make_response({'error': 'Nombre de columnas no invalidos en el csv. Las columnas deben ser: id, articulo, descripcion'}, 400)
+    else:
+        # ...Procesamiento de la información...
+        pass
+
     bienes = [_get_bien_model(articulo, descripcion, current_user.id)
               for _, articulo, descripcion in bienes_df.to_numpy()]
 
     try:
         db.session.add_all(bienes)
         db.session.commit()
+    except exc.SQLAlchemyError as e:
+        db.session.rollback()
+        return make_response(
+            {'error': 'No fue posible agregar la información del csv en la base de datos debido a un error con el ORM'}, 500)
     except Exception as e:
         print(e)
         return make_response(
-            {'error': 'No fue posible agregar la información del csv en la base de datos'}, 500)
+            {'error': 'Un error fatal ocurrió durante la operación en la base de datos'}, 500)
 
     return make_response({'no_bienes': len(bienes), 'user_info': _get_user_info(current_user)})
 
@@ -52,10 +62,10 @@ def bienes_registration(current_user):
     try:
         db.session.add(bien)
         db.session.commit()
-    except IntegrityError:
+    except exc.SQLAlchemyError as e:
+        db.session.rollback()
         return make_response({'succes': False, 'error': 'Posible duplicado'}, 403)
     except Exception as e:
-        print(e)
         return make_response({'succes': False, 'error': 'Un error interno ocurrió con las credenciales brindadas, revisar'}, 500)
 
     return make_response({'succes': True, 'bien': {'articulo': articulo, 'id': bien.id}, 'user_info': _get_user_info(current_user)}, 200)
@@ -93,8 +103,13 @@ def bienes_update(current_user, bien_id):
     if bien_modificado:
         cambios_por_columna = request.get_json()
         cambios_por_columna['updated_at'] = dt.utcnow().isoformat()
-        bien.update(cambios_por_columna)
-        db.session.commit()
+        try:
+            bien.update(cambios_por_columna)
+            db.session.commit()
+        except exc.SQLAlchemyError:
+            db.session.rollback()
+            return make_response({'succes': False, 'error': 'Posible duplicado'}, 403)
+
         return make_response({'bien': _get_bien_info(bien_modificado), 'user_info': _get_user_info(current_user)}, 200)
 
     else:
@@ -111,10 +126,14 @@ def bienes_delete(current_user, bien_id):
         succes = False
         status = 403
     else:
-        db.session.delete(bien)
-        db.session.commit()
-        succes = True
-        status = 200
+        try:
+            db.session.delete(bien)
+            db.session.commit()
+            succes = True
+            status = 200
+        except exc.SQLAlchemyError:
+            db.session.rollback()
+            return make_response({'succes': False, 'error': 'Posible duplicado'}, 403)
 
     return make_response({'succes': succes, 'user_info': _get_user_info(current_user)}, status)
 

@@ -1,6 +1,6 @@
 from flask import request, Blueprint, make_response, jsonify
 from pymysql.err import IntegrityError
-from sqlalchemy.exc import IntegrityError, PendingRollbackError
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime as dt
 from flask import current_app as app
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -28,16 +28,14 @@ def registrate_user():
     try:
         db.session.add(user)
         db.session.commit()
-        valid_credentials = True
-    except IntegrityError:
-        valid_credentials = False
+    except SQLAlchemyError:
+        return make_response({'error': 'Un error en la base de datos ocurrió con las credenciales brindadas, posible duplicado'}, 409)
     except Exception as e:
-        print(e)
         return make_response({'error': 'Un error interno ocurrió con las credenciales brindadas, revisar'}, 500)
 
     jwt_encode = jwt.encode({'usuario': user.usuario, 'contrasenia': secure_con},
                             app.config['SECRET_KEY'],
-                            algorithm="HS256").decode("utf-8")
+                            algorithm="HS256")
 
     return make_response(jsonify(jwt_encode))
 
@@ -48,7 +46,7 @@ def login_user():
     contrasenia = request.form.get('contrasenia')
 
     if not usuario or not contrasenia:
-        return make_response({'could not verify', 401})
+        return make_response({'error': 'could not verify'}, 403)
 
     user = User.query.filter_by(usuario=usuario).first()
 
@@ -56,7 +54,7 @@ def login_user():
         token = jwt.encode(
             {'usuario': user.usuario, 'contrasenia': user.contrasenia},
             app.config['SECRET_KEY'],
-            algorithm="HS256").decode('UTF-8')
+            algorithm="HS256")
 
         return make_response(jsonify({'token': token}), 200)
 
