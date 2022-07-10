@@ -6,23 +6,6 @@ import jwt
 from ..models.user import User
 from functools import wraps
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login_user():
-
-#     auth = request.authorization
-
-#     if not auth or not auth.username or not auth.password:
-#         return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
-
-#     user = User.query.filter_by(name=auth.username).first()
-
-#     if check_password_hash(user.password, auth.password):
-#         token = jwt.encode(
-#             {'usuario': user.usuario, 'contrasenia': user.contrasenia}, app.config['SECRET_KEY'])
-#         return jsonify({'token': token.decode('UTF-8')})
-
-#     return make_response('could not verify',  401, {'WWW.Authentication': 'Basic realm: "login required"'})
-
 
 def token_required(f):
     @wraps(f)

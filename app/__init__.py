@@ -1,6 +1,5 @@
-from flask import Flask, send_from_directory
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 
 from flask_migrate import Migrate
 migrate = Migrate(compare_type=True)
@@ -12,8 +11,6 @@ def create_app():
     app.config.from_object('config.Config')
 
     db.init_app(app)
-    login_manager = LoginManager()
-    login_manager.init_app(app)
     with app.app_context():
 
         from .usuarios.session import user_session

@@ -2,24 +2,12 @@ from .. import db
 # from .base_model import BaseModel
 # from .bienes import Bienes
 from sqlalchemy import ForeignKey
+from .base_model import BaseModel
 
 
-# class User(BaseModel, db.Model):
-class User(db.Model):
+class User(BaseModel):
+    # class User(db.Model):
     __tablename__ = 'user'
-    # ?
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-        # autoincrement=True
-    )
-    created_at = db.Column(
-        db.DateTime,
-    )
-    updated_at = db.Column(
-        db.DateTime,
-    )
-    # ?
     nombre = db.Column(
         db.String(30),
         nullable=False
@@ -32,5 +20,4 @@ class User(db.Model):
         db.Text(),
         nullable=False
     )
-    # bien_id = db.Column(db.Integer, ForeignKey(Bienes.id), nullable=True)
     bienes = db.relationship("Bienes")

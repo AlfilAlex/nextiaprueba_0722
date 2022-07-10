@@ -42,22 +42,22 @@ def registrate_user():
     return make_response(jsonify(jwt_encode))
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@user_session.route('/login', methods=['POST'])
 def login_user():
+    usuario = request.form.get('usuario')
+    contrasenia = request.form.get('contrasenia')
 
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
+    if not usuario or not contrasenia:
         return make_response({'could not verify', 401})
 
-    user = User.query.filter_by(name=auth.username).first()
+    user = User.query.filter_by(usuario=usuario).first()
 
-    if check_password_hash(user.password, auth.password):
+    if user and check_password_hash(user.contrasenia, contrasenia):
         token = jwt.encode(
             {'usuario': user.usuario, 'contrasenia': user.contrasenia},
             app.config['SECRET_KEY'],
             algorithm="HS256").decode('UTF-8')
 
-        return jsonify({'token': token})
+        return make_response(jsonify({'token': token}), 200)
 
-    return make_response({'could not verify',  401})
+    return make_response({'error': 'could not verify'},  401)
