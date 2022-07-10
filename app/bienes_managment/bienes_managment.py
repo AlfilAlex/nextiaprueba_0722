@@ -94,10 +94,10 @@ def bienes_read(current_user):
 @bienes_managment.route('/usuario/bienes', methods=['GET'])
 @token_required
 def user_bienes_read(current_user):
-    bienes_in_db = [Bienes.query.get(bien_id)
+    bienes_in_db = [Bienes.query.get(bien_id.id)
                     for bien_id in current_user.bienes]
-    bienes_info = [_get_bien_info(bien) for bien in bienes_in_db]
-
+    bienes_info = [_get_bien_info(bien)
+                   for bien in bienes_in_db if bien is not None]
     if not bienes_info:
         succes = False
         message = {
