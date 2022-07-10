@@ -92,7 +92,7 @@ def bienes_read(current_user):
         message = {'bienes': bienes_info}
         status = 200
 
-    return make_response({'succes': succes, 'message': message, 'user_info': _get_user_info(current_user)}, status)
+    return make_response({'succes': succes, 'data': message, 'user_info': _get_user_info(current_user)}, status)
 
 
 @bienes_managment.route('/bienes-managment/<int:bien_id>', methods=['PUT'])
