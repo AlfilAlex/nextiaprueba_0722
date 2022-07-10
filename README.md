@@ -58,19 +58,43 @@ de quien aplica a la vacante de desarrollador Backend.
 
 ## Justificación de los puntos a desarrollar
 
-1. COnfiguración del proyecto
+1. Configuración del proyecto
+   Creación de archivo .env para almacenar variables de entorno y archivo .gitignore para evitar compartir información privada.
+   Creación del archivo requirements.txt para duplicar el entorno virtual.
 
 2. Crear un Modelo “Base” del cual heredarán los demás modelos.
+   Modelo base en app_prueba/app/models/base_model.py.
+   Se implementó la propiedad **abstract**=True, que permite generar un modelo sin que SQLAlchemy genere una tabla para este. Con lo cual es posible hererdad sus propiedad sin utilizar un mapping.
 
 3. Generar un modelo para usuarios (que herede de BaseModel).
+   Se implementó el modelo users en: app_prueba/app/models/user.py.
+   Se heredó de ModeloBase las propiedad pertienentes.
+
+Se declaró como _unique_ la propiedad usuario.
 
 4. Autenticación de usuarios bajo el
    estándar JWT.
+   Se generó una SECRET_KEY utilizada para la encriptación de los datos y se obtuvo un decorador que permite realizar la autenticación de los usuarios.
+   Se considera buena idea implementar las siguientes caracteristicas:
+
+-   Una propiedad exp del token y la renovación de este cada inicio de sesión.
 
 5. Crear un modelo llamado Bienes (que herede de BaseModel).
+   Se implementó el modelo users en: app_prueba/app/models/bienes.py.
+   Se heredó de ModeloBase las propiedad pertienentes.
 
 6. Registro de usuarios y carga de los datos del csv a la base de datos.
+   Para implementar estas funcionalidades se optó por generar EP, que a su vez pueden ser útiles para automatizar diferentes tareas.
+
+-   Un EP para el registro de usuarios a través de un formulario
+-   Un EP para que usuarios registrados puedan subir archivos csv para registrar sus bienes.
+    Esta ruta está protegida con JWT.
 
 7. Crear endpoints CRUD para el modelo Bienes protegidos con JWT.
+
+-   EP Create: Creación de bienes a partir de datos de un formulario
+-   EP Read: Obtención de beienes a partir de ids de bienes
+-   EP Update: Modificación de bienes a partir de un id y los nuevos valores.
+-   EP Delete: Eliminación de un bien a partir de su id.
 
 8. Crear un endpoint para solicitar información de Bienes a través de múltiples id’s.
