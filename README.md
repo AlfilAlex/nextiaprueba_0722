@@ -2,9 +2,9 @@
 
 ## Descripción
 
-Respo con el código de la prueba técnia de desarrollador backend con Python para Nextia en la que se crearon diferentes EP para registro, login de usuarios y la creación de objetos denominados 'bienes'.
+Respo con el código de la prueba técnia de desarrollador backend con Python para Nextia en la que se crearon diferentes EP para registro, login de usuarios y la creación de objetos denominados 'bienes'. Para la seguridad se implementó JWT y se protegieron las rutas mediante este protocolo.
 
-Para la seguridad se implementó JWT y se protegieron las rutas mediante este protocolo.
+Utilizar el requirement.txt para generar una copia en environment.
 
 ## Objetivo
 
@@ -57,3 +57,20 @@ de quien aplica a la vacante de desarrollador Backend.
    me regrese un array de los registros solicitados.
 
 ## Justificación de los puntos a desarrollar
+
+1. COnfiguración del proyecto
+
+2. Crear un Modelo “Base” del cual heredarán los demás modelos.
+
+3. Generar un modelo para usuarios (que herede de BaseModel).
+
+4. Autenticación de usuarios bajo el
+   estándar JWT.
+
+5. Crear un modelo llamado Bienes (que herede de BaseModel).
+
+6. Registro de usuarios y carga de los datos del csv a la base de datos.
+
+7. Crear endpoints CRUD para el modelo Bienes protegidos con JWT.
+
+8. Crear un endpoint para solicitar información de Bienes a través de múltiples id’s.
