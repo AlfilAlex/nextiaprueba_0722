@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from ..models.user import User
 from .. import db
+
 import jwt
 
 api_prefix = app.config['PREFIX']
@@ -17,7 +18,7 @@ user_session = Blueprint('user_session', __name__, url_prefix=api_prefix)
 def registrate_user():
     nombre = request.form.get('nombre')
     usuario = request.form.get('usuario')
-    contrasenia = request.form.get('password')
+    contrasenia = request.form.get('contrasenia')
     secure_con = generate_password_hash(contrasenia, "sha256")
 
     user = User(created_at=dt.utcnow().isoformat(),
@@ -28,7 +29,8 @@ def registrate_user():
     try:
         db.session.add(user)
         db.session.commit()
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
+        print(e)
         return make_response({'error': 'Un error en la base de datos ocurrió con las credenciales brindadas, posible duplicado'}, 409)
     except Exception as e:
         return make_response({'error': 'Un error interno ocurrió con las credenciales brindadas, revisar'}, 500)

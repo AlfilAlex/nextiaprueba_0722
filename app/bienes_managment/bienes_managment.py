@@ -1,6 +1,4 @@
 from flask import request, Blueprint, make_response
-from pymysql.err import IntegrityError
-from sqlalchemy.exc import IntegrityError
 from datetime import datetime as dt
 from flask import current_app as app
 from sqlalchemy import exc
@@ -48,7 +46,7 @@ def user_csv_post_bienes(current_user):
     return make_response({'no_bienes': len(bienes), 'user_info': _get_user_info(current_user)})
 
 
-@bienes_managment.route('/bienes-managment', methods=['POST'])
+@bienes_managment.route('/usuario/bienes', methods=['POST'])
 @token_required
 def bienes_registration(current_user):
     articulo = request.form.get('articulo')
@@ -71,11 +69,9 @@ def bienes_registration(current_user):
     return make_response({'succes': True, 'bien': {'articulo': articulo, 'id': bien.id}, 'user_info': _get_user_info(current_user)}, 200)
 
 
-@bienes_managment.route('/bienes-managment/buscar', methods=['GET'])
+@bienes_managment.route('/usuario/bienes/buscar', methods=['GET'])
 @token_required
 def bienes_read(current_user):
-    usuario_id = current_user.id
-
     bien_ids = request.args.get('bien_id')
     bien_ids = bien_ids.split(',')
 
@@ -95,7 +91,27 @@ def bienes_read(current_user):
     return make_response({'succes': succes, 'data': message, 'user_info': _get_user_info(current_user)}, status)
 
 
-@bienes_managment.route('/bienes-managment/<int:bien_id>', methods=['PUT'])
+@bienes_managment.route('/usuario/bienes', methods=['GET'])
+@token_required
+def user_bienes_read(current_user):
+    bienes_in_db = [Bienes.query.get(bien_id)
+                    for bien_id in current_user.bienes]
+    bienes_info = [_get_bien_info(bien) for bien in bienes_in_db]
+
+    if not bienes_info:
+        succes = False
+        message = {
+            'error': f'No existen bienes para el suauario: {current_user.usuario}'}
+        status = 500
+    else:
+        succes = True
+        message = {'bienes': bienes_info}
+        status = 200
+
+    return make_response({'succes': succes, 'data': message, 'user_info': _get_user_info(current_user)}, status)
+
+
+@bienes_managment.route('/usuario/bienes/<int:bien_id>', methods=['PUT'])
 @token_required
 def bienes_update(current_user, bien_id):
     bien = Bienes.query.filter_by(id=bien_id)
@@ -117,10 +133,9 @@ def bienes_update(current_user, bien_id):
             {'error': f'El bien con id {bien_id} puede no existir'}, 403)
 
 
-@bienes_managment.route('/bienes-managment/<bien_id>', methods=['DELETE'])
+@bienes_managment.route('/usuario/bienes/<bien_id>', methods=['DELETE'])
 @token_required
 def bienes_delete(current_user, bien_id):
-    usuario_id = current_user.id
     bien = Bienes.query.get(bien_id)
     if not bien:
         succes = False
@@ -133,9 +148,9 @@ def bienes_delete(current_user, bien_id):
             status = 200
         except exc.SQLAlchemyError:
             db.session.rollback()
-            return make_response({'succes': False, 'error': 'Posible duplicado'}, 403)
+            status = 409
 
-    return make_response({'succes': succes, 'user_info': _get_user_info(current_user)}, status)
+    return make_response({'succes': succes, 'user_info': _get_user_info(current_user) if succes else 'Error al realizar la operación'}, status)
 
 
 def _get_bien_model(articulo, descripcion, usuario_id):
@@ -152,5 +167,5 @@ def _get_bien_info(bien):
             'descripcion': bien.descripcion, 'user_author_id': bien.usuario_id}
 
 
-def _get_user_info(user):
-    return {'nombre': user.nombre, 'id': user.id, 'bienes': [bien.id for bien in user.bienes]}
+def _get_user_info(usuario):
+    return {'nombre': usuario.nombre, 'id': usuario.id, 'bienes': [bien.id for bien in usuario.bienes]}
